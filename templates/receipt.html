@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Receipt</title>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <style>
+    @media print {
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      Payment Receipt
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Thank you for your payment!</h5>
+      <p class="card-text"><strong>Name:</strong> {{ user_name }}</p>
+      <p class="card-text"><strong>Course:</strong> {{ course_name }}</p>
+      <p class="card-text"><strong>Amount Paid:</strong> &#8377; {{ amount }}</p>
+      <p class="card-text"><strong>Date of Payment:</strong> {{ date }}</p>
+      <p class="card-text"><strong>Currency:</strong> INR</p>
+      
+      <!-- Buttons for download and redirect -->
+      <div class="text-center mt-4 no-print">
+        <button class="btn btn-primary" onclick="downloadReceipt()">Download Receipt</button>
+        <button class="btn btn-secondary ml-2" onclick="redirectToDashboard()">Go to Dashboard</button>
+      </div>
+    </div>
+    <div class="card-footer text-muted">
+      Transaction completed successfully.
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+
+<script>
+  // Function to print the receipt
+  function downloadReceipt() {
+    window.print();
+  }
+
+  // Function to redirect to the student dashboard
+  function redirectToDashboard() {
+    window.location.href = '/student_detail'; // Update with the actual dashboard URL if needed
+  }
+</script>
+</body>
+</html>

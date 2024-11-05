@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Admin Dashboard - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    body{
+      font-family: 'Barlow', sans-serif;
+    }
+
+    a:hover{
+      text-decoration: none;
+    }
+
+    .border-left{
+      border-left: 2px solid var(--primary) !important;
+    }
+
+    .sidebar{
+      top: 0;
+      left : 0;
+      z-index : 100;
+      overflow-y: auto;
+    }
+
+    .overlay{
+      background-color: rgb(0 0 0 / 45%);
+      z-index: 99;
+    }
+
+    @media screen and (max-width: 767px){
+      .sidebar{
+        max-width: 18rem;
+        transform : translateX(-100%);
+        transition : transform 0.4s ease-out;
+      }
+      .sidebar.active{
+        transform : translateX(0);
+      }
+    }
+
+    .sidebar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+      <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+      <center>
+        <h1 class="dropdown-header text-primary">{{ session['name'] }}</h1> <!-- Increased to h1 and set to blue -->
+        <small class="dropdown-item text-muted text-primary">Role: Student</small> <!-- Role text in blue -->
+
+      </center>
+      <div class="list-group rounded-0">
+        <a href="{{ url_for('student_assigned_course') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+            <span class="ml-2">Student Assigned Course</span>
+        </a>
+        <a href="{{ url_for('student_current_class') }}" class="list-group-item list-group-item-action active border-0 align-items-center">
+    
+          <span class="ml-2">Show Class</span>
+        </a>
+        <a href="{{ url_for('student_see_recording') }}" class="list-group-item list-group-item-action border-0 align-items-center">
+    
+          <span class="ml-2">click Recording</span>
+        </a>
+        <a href="{{ url_for('student_view_notes') }}" class="list-group-item list-group-item-action border-0 align-items-center">
+    
+          <span class="ml-2">Show notes</span>
+        </a>
+        <a href="{{ url_for('student_manage_review') }}" class="list-group-item list-group-item-action border-0 align-items-center">
+    
+          <span class="ml-2">Review</span>
+        </a>
+        
+      
+        <div class="collapse" id="purchase-collapse" data-parent="#sidebar">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Sellers</a>
+            <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Purchase Orders</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+    <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+      <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+        <button class="btn py-0 d-lg-none" id="open-sidebar">
+          <span class="bi bi-list text-primary h3"></span>
+        </button>
+        <div class="dropdown ml-auto">
+          <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+            <span class="bi bi-person text-primary h4"></span>
+            <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+            <h6 class="dropdown-header">{{ session['name'] }}</h6> <!-- Display user's name -->
+            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+          </div>
+        </div>
+      </nav>
+      <main class="container-fluid">
+        <section class="row">
+          
+          
+          
+        </section>
+        <div class="jumbotron jumbotron-fluid rounded bg-white border-0 shadow-sm border-left px-4">
+            <h2>Select Course</h2>
+            <form id="courseForm">
+                <div class="form-group">
+                    <label for="courseSelect">Choose a course:</label>
+                    <select id="courseSelect" name="course_id" class="form-control">
+                        <option value="">Select a course</option>
+                        {% for course_id, course_name in courses %}
+                            <option value="{{ course_id }}">{{ course_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        
+            <h3>Today's Classes</h3>
+            <div id="classDetails">
+                <!-- Class details table will be loaded here dynamically -->
+            </div>
+        </div>
+        <!-- Button to analyze sentences -->
+        
+      </main>
+    </div>
+  </div>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+<script>
+  $(document).ready(function(){
+    $("#open-sidebar").click(function(){
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    $("#sidebar-overlay").click(function(){
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    $('#courseSelect').change(function() {
+        let course_id = $(this).val();
+        if (course_id) {
+            $.ajax({
+                url: '/student_get_class_details',
+                type: 'POST',
+                data: { course_id: course_id },
+                success: function(response) {
+                    let classTable = `<table class="table table-bordered mt-3">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Teacher</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    
+                    if (response.length > 0) {
+                        response.forEach(class_ => {
+                            classTable += `
+                                <tr>
+                                    <td>${class_.date}</td>
+                                    <td>${class_.time}</td>
+                                    <td>${class_.teacher}</td>
+                                    <td>${class_.description}</td>
+                                    <td><a href="${class_.online_link}" target="_blank" class="btn btn-primary btn-sm">Join</a></td>
+                                </tr>`;
+                        });
+                    } else {
+                        classTable += `<tr><td colspan="5" class="text-center">No classes available for today.</td></tr>`;
+                    }
+
+                    classTable += `</tbody></table>`;
+                    $('#classDetails').html(classTable);
+                }
+            });
+        } else {
+            $('#classDetails').html('');
+        }
+    });
+  });
+</script>
+</body>
+</html>

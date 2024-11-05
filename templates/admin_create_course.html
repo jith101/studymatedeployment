@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create New Course - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+    body {
+      font-family: 'Barlow', sans-serif;
+    }
+    .border-left {
+      border-left: 2px solid var(--primary) !important;
+    }
+    .sidebar {
+      top: 0;
+      left: 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .overlay {
+      background-color: rgb(0 0 0 / 45%);
+      z-index: 99;
+    }
+    @media screen and (max-width: 767px) {
+      .sidebar {
+        max-width: 18rem;
+        transform: translateX(-100%);
+        transition: transform 0.4s ease-out;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    }
+    .sidebar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 20px auto;
+    }
+    .text-danger {
+      color: #dc3545;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <!-- sidebar -->
+    <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+      <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+      <div class="list-group rounded-0">
+        <!-- sidebar items here -->
+      </div>
+      <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+        <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+        <div class="list-group rounded-0">
+          <a href="/admin_dashboard_acceptTeacher" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+            <span class="ml-2">Accept Teacher</span>
+          </a>
+          <a href="{{ url_for('create_course') }}" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+          
+            <span class="ml-2">Create Course</span>
+          </a>
+          <a href="{{ url_for('course_list') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+            <span class="ml-2">Course List</span>
+          </a>
+          <a href="/admin_add_module" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            <span class="ml-2">Add/Manage Modules</span>
+        </a>
+        <a href="{{ url_for('admin_create_timetable') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+          <span class="ml-2">Course Timetable</span>
+        </a>
+        
+        </div>
+      </div>
+    </div>
+    <!-- overlay to close sidebar on small screens -->
+    <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+    <!-- main content -->
+    <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+      <!-- top nav -->
+      <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+        <!-- close sidebar -->
+        <button class="btn py-0 d-lg-none" id="open-sidebar">
+          <span class="bi bi-list text-primary h3"></span>
+        </button>
+        <div class="dropdown ml-auto">
+          <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+            <span class="bi bi-person text-primary h4"></span>
+            <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+            <a class="dropdown-item" href="/logout">Logout</a>
+            <a class="dropdown-item" href="#">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <!-- main content -->
+      <main class="container-fluid">
+        <h2 class="mb-4">Create New Course</h2>
+        <!-- Display messages -->
+        <div class="container mt-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                  {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                          {{ message }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                  {% endfor %}
+              {% endif %}
+          {% endwith %}
+      </div>
+      
+        <form id="course-form" method="POST" action="{{ url_for('create_course') }}">
+          <div class="form-group">
+            <label for="course-type">Course Type</label>
+            <select id="course-type" name="course_type" class="form-control" required>
+              <option value="" disabled selected>Select Course Type</option>
+              <option value="NEET">NEET</option>
+              <option value="JEE / KEAM">JEE / KEAM</option>
+            </select>
+            <div class="invalid-feedback">Please select a course type.</div>
+          </div>
+          <div class="form-group">
+            <label for="teacher-select">Teachers</label>
+            <select id="teacher-select" name="teachers" class="form-control" multiple required>
+              <!-- Options will be populated via AJAX -->
+            </select>
+            <div class="invalid-feedback">Please select at least one teacher.</div>
+          </div>
+          <div class="form-group">
+            <label for="course-desc">Course Description</label>
+            <textarea id="course-desc" name="desc" class="form-control" rows="3" required></textarea>
+            <div class="invalid-feedback">Please enter a course description.</div>
+          </div>
+          <div class="form-group">
+            <label for="course-price">Course Price (INR)</label>
+            <input type="number" id="course-price" name="price" class="form-control" min="500" max="10000" required>
+            <small id="price-note" class="form-text text-danger">Note :- Course price must be more than 500 INR and max 10000 INR.</small>
+            <div class="invalid-feedback">Please enter a valid course price.</div>
+          </div>
+          <div class="form-group">
+            <label for="start-date">Start Date</label>
+            <input type="date" id="start-date" name="start_date" class="form-control" required>
+            <div class="invalid-feedback">Please select a start date.</div>
+          </div>
+          <div class="form-group">
+            <label for="end-date">End Date</label>
+            <input type="date" id="end-date" name="end_date" class="form-control" disabled>
+            <small id="course-duration-note" class="form-text text-danger">Note :- A course lasts for 1 year.</small>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </main>
+    </div>
+  </div>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+<script>
+  $(document).ready(function() {
+    // Set the min date to today for the start date input
+    var today = new Date().toISOString().split('T')[0];
+    $('#start-date').attr('min', today);
+
+    // Function to calculate and set end date
+    function setEndDate(startDate) {
+        var start = new Date(startDate);
+        var end = new Date(start.setFullYear(start.getFullYear() + 1));
+        var endDate = end.toISOString().split('T')[0];
+        $('#end-date').val(endDate);
+    }
+
+    // Show end date and calculate duration
+    $('#start-date').on('change', function() {
+        var startDate = $(this).val();
+        if (startDate) {
+            setEndDate(startDate);
+        }
+    });
+
+    // Fetch teachers based on course type
+    $('#course-type').on('change', function() {
+    var courseType = $(this).val();
+    $.ajax({
+        url: '/get_teachers',
+        method: 'GET',
+        data: { course_type: courseType },
+        success: function(response) {
+            console.log(response); // This will show the entire response object
+            $('#teacher-select').empty();
+            $.each(response.teachers, function(index, teacher) {
+                console.log(teacher.id);  // This will now correctly log the teacher ID
+                $('#teacher-select').append('<option value="' + teacher.id + '">' + teacher.name + ' | ' + teacher.subject + '</option>');
+            });
+        }
+    });
+});
+
+
+    // Sidebar toggle
+    $('#open-sidebar').click(function() {
+        $('.sidebar').toggleClass('active');
+        $('#sidebar-overlay').toggleClass('d-none');
+    });
+
+    $('#sidebar-overlay').click(function() {
+        $('.sidebar').toggleClass('active');
+        $('#sidebar-overlay').toggleClass('d-none');
+    });
+    $('#course-form').on('submit', function() {
+    // Enable the end_date field before submission
+    $('#end-date').prop('disabled', false);
+});
+$(document).ready(function() {
+        // Automatically dismiss the alert after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    });
+});
+
+</script>
+</body>
+</html>

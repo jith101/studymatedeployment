@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Teacher Profile</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Update Profile</h2>
+
+        <!-- Bootstrap alert message -->
+        <div id="updateMessage" class="alert alert-success d-none" role="alert">
+            Profile updated successfully!
+        </div>
+
+        <form id="updateForm" method="POST" action="{{ url_for('update_teacher') }}">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ user['name'] }}" required>
+                <span id="nameError" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="des">Description:</label>
+                <textarea class="form-control" id="des" name="des" rows="3" required>{{ user['des'] }}</textarea>
+                <span id="desError" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="exp">Experience (years):</label>
+                <input type="number" class="form-control" id="exp" name="exp" value="{{ user['exp'] }}" required min="0">
+                <span id="expError" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <select class="form-control" id="subject" name="subject" required>
+                    <option value="">Select a subject</option>
+                    <option value="physics" {{ 'selected' if user['subject'] == 'physics' else '' }}>Physics</option>
+                    <option value="chemistry" {{ 'selected' if user['subject'] == 'chemistry' else '' }}>Chemistry</option>
+                    <option value="biology" {{ 'selected' if user['subject'] == 'biology' else '' }}>Biology</option>
+                    <option value="math" {{ 'selected' if user['subject'] == 'math' else '' }}>Math</option>
+                </select>
+                <span id="subjectError" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" required>
+                <span id="passwordError" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Password validation
+            $('#password').on('keyup', function() {
+                var password = $(this).val();
+                var error = '';
+
+                if (password.length < 8) {
+                    error = 'Password must be at least 8 characters long.';
+                } else if (!/[A-Z]/.test(password)) {
+                    error = 'Password must contain at least one uppercase letter.';
+                } else if (!/[a-z]/.test(password)) {
+                    error = 'Password must contain at least one lowercase letter.';
+                } else if (!/[0-9]/.test(password)) {
+                    error = 'Password must contain at least one digit.';
+                } else if (!/[!@#$%^&*]/.test(password)) {
+                    error = 'Password must contain at least one special character.';
+                }
+
+                $('#passwordError').text(error);
+                if (error === '') {
+                    $('#passwordError').hide();
+                } else {
+                    $('#passwordError').show();
+                }
+            });
+
+            // Form validation for name, description, experience, and subject
+            $('#updateForm').on('submit', function(e) {
+                var valid = true;
+
+                if ($('#name').val().trim() === '') {
+                    $('#nameError').text('Name is required.');
+                    $('#nameError').show();
+                    valid = false;
+                } else {
+                    $('#nameError').hide();
+                }
+
+                if ($('#des').val().trim() === '') {
+                    $('#desError').text('Description is required.');
+                    $('#desError').show();
+                    valid = false;
+                } else {
+                    $('#desError').hide();
+                }
+
+                if ($('#exp').val() === '' || $('#exp').val() < 0) {
+                    $('#expError').text('Experience must be a non-negative number.');
+                    $('#expError').show();
+                    valid = false;
+                } else {
+                    $('#expError').hide();
+                }
+
+                if ($('#subject').val() === '') {
+                    $('#subjectError').text('Please select a subject.');
+                    $('#subjectError').show();
+                    valid = false;
+                } else {
+                    $('#subjectError').hide();
+                }
+
+                if ($('#passwordError').is(':visible') || !valid) {
+                    e.preventDefault();
+                } else {
+                    // Show success message and hide after 3 seconds
+                    $('#updateMessage').removeClass('d-none').delay(5000).fadeOut();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

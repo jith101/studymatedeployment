@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Courses List - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .course-container {
+      width: 220px;
+      height: 260px;
+      border-radius: 20px;
+      box-shadow: 0 8px 15px rgba(0, 123, 191, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      padding: 25px;
+      text-align: center;
+      margin: 20px;
+      background: linear-gradient(135deg, #007bff 0%, #00c6ff 100%);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 300%;
+      height: 300%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(45deg);
+      transition: all 0.3s ease;
+      z-index: 0;
+    }
+
+    .course-container:hover::before {
+      top: -70%;
+      left: -70%;
+    }
+
+    .course-container:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 25px rgba(0, 123, 191, 0.4);
+    }
+
+    .course-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .course-price {
+      font-size: 1.2rem;
+      margin-top: 15px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .btn-more {
+      margin-top: 25px;
+      background-color: #fff;
+      color: #007bff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      z-index: 1;
+      position: relative;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-more:hover {
+      background-color: #005f8f;
+      color: #fff;
+    }
+
+    .course-container .icon-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      padding: 10px;
+      z-index: 1;
+    }
+
+    .course-container .icon-badge i {
+      font-size: 1.2rem;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 ml-md-auto px-0">
+      <nav class="w-100 d-flex justify-content-between px-4 py-2 mb-4 shadow-sm">
+        <span style="color: #007bff; font-weight: bold;">Course List</span>
+        <div>
+          {% if session.uid %}
+            <span style="color: #007bff; font-weight: bold; margin-right: 15px;">Welcome, {{ session.name }}</span>
+            <a href="/student_detail" class="btn btn-info mr-2">Dashboard</a>
+            <a href="/logout" class="btn btn-danger">Logout</a>
+          {% else %}
+            <a href="/login" class="btn btn-primary">Login</a>
+          {% endif %}
+        </div>
+      </nav>
+      
+      <main class="container-fluid">
+        {% if courses %}
+        <section class="row justify-content-center">
+          {% for course in courses %}
+          <div class="course-container">
+            <div class="icon-badge">
+              <i class="bi bi-book"></i>
+            </div>
+            <div class="course-name">{{ course['name'] }}</div>
+            <div class="course-price">&#8377; {{ course['cost'] }}</div>
+            <button class="btn-more" data-toggle="modal" data-target="#largeModal" onclick="loadCourseDetails({{ course['course_id'] }})">More</button>
+          </div>
+          {% endfor %}
+        </section>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+          <script>window.location.href = '/student_dashboard'</script>
+        </div>
+        {% endif %}
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="largeModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Course Details</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3 id="course-name">Course Name</h3>
+        <p id="course-desc">Course Description</p>
+        <input type="hidden" id="course-id">
+
+        <p><strong>Price:</strong> <span id="course-price"></span></p>
+        <p><strong>Start Date:</strong> <span id="course-start-date"></span></p>
+        <p><strong>End Date:</strong> <span id="course-end-date"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="handlePayment()">Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Assuming you have a `userLoggedIn` variable in your session, pass it to the template
+  const userLoggedIn = {{ 'true' if session.uid else 'false' }};
+</script>
+
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+<script>
+function loadCourseDetails(courseId) {
+    $.ajax({
+        url: `/course/` + courseId,
+        method: 'GET',
+        success: function(course) {
+            $('#course-name').text(course['name']);
+            $('#course-desc').text(course['cours_desc']);
+            $('#course-price').text('₹' + course['cost']);
+            $('#course-start-date').text(course['start_Date']);
+            $('#course-end-date').text(course['end_date']);
+            // Store the course_id for later use in handlePayment
+            $('#course-id').val(courseId);  // Add a hidden input to store course_id
+        }
+    });
+}
+
+
+// Initialize Stripe with your publishable key
+let stripe = Stripe('pk_test_51PqTo5SJCzDLwdFn3HfhyBoD8SayCxWHsgv2WmsvYvpn1bs9wyNAXjpQiwJlUBHrjmJeLmLHimaJxcJWRg1YemK300HliRJ2Fd');
+
+function handlePayment() {
+  if (!userLoggedIn) {
+        alert('You need to be logged in to make a purchase. Redirecting to the login page.');
+        window.location.href = '/login'; // Redirect to login page
+        return;
+    }
+
+    // Retrieve the course ID from the hidden input field
+    const courseId = document.getElementById('course-id').value;
+
+    fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            courseName: document.getElementById('course-name').innerText,
+            amount: parseInt(document.getElementById('course-price').innerText.replace('₹', '')) * 100,  // Convert to paise
+            courseId: courseId  // Pass the course_id to the backend
+        })
+    })
+    .then(response => response.json())
+    .then(session => {
+        return stripe.redirectToCheckout({ sessionId: session.id });
+    })
+    .then(result => {
+        if (result.error) {
+            alert(result.error.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}</script>
+</body>
+</html>

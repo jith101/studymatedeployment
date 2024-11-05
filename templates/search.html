@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Registered Teachers</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+    body {
+      font-family: 'Barlow', sans-serif;
+      background-color: #f8f9fa;
+      padding: 30px;
+    }
+    .container {
+      position: relative;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background-color: #007bff;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-primary my-4 text-center">Search Registered Teachers</h2>
+    <div class="rounded-container p-4">
+      <div class="form-group">
+        <label for="searchEmail">Search by Email</label>
+        <input type="email" class="form-control" id="searchEmail" placeholder="Enter teacher's email">
+      </div>
+      <button type="button" class="btn btn-primary btn-block" onclick="searchTeacher()">Search</button>
+      <table class="table table-striped table-bordered mt-4">
+        <thead>
+          <tr>
+            <th>Teacher Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="teacherTableBody">
+          <!-- Dynamic content will be added here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    function searchTeacher() {
+      const email = $('#searchEmail').val();
+      if (email) {
+        $.ajax({
+          url: '/search_teachers', // Backend endpoint
+          method: 'GET',
+          data: { email: email },
+          success: function(response) {
+            const teachers = response.teachers;
+            const tbody = $('#teacherTableBody');
+            tbody.empty(); // Clear the table body
+
+            if (teachers.length > 0) {
+              teachers.forEach(teacher => {
+                const row = `<tr>
+                  <td>${teacher.name}</td>
+                  <td>${teacher.status}</td>
+                </tr>`;
+                tbody.append(row);
+              });
+            } else {
+              tbody.append('<tr><td colspan="2">No teachers found</td></tr>');
+            }
+          },
+          error: function(error) {
+            console.error('Error fetching teachers:', error);
+          }
+        });
+      } else {
+        alert('Please enter an email to search');
+      }
+    }
+  </script>
+</body>
+</html>

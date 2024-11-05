@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Admin Dashboard - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    body{
+      font-family: 'Barlow', sans-serif;
+    }
+
+    a:hover{
+      text-decoration: none;
+    }
+
+    .border-left{
+      border-left: 2px solid var(--primary) !important;
+    }
+
+    .sidebar{
+      top: 0;
+      left : 0;
+      z-index : 100;
+      overflow-y: auto;
+    }
+
+    .overlay{
+      background-color: rgb(0 0 0 / 45%);
+      z-index: 99;
+    }
+
+    /* sidebar for small screens */
+    @media screen and (max-width: 767px){
+      .sidebar{
+        max-width: 18rem;
+        transform : translateX(-100%);
+        transition : transform 0.4s ease-out;
+      }
+      .sidebar.active{
+        transform : translateX(0);
+      }
+    }
+
+    .sidebar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 20px auto;
+    }
+
+    .message {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <!-- sidebar -->
+    <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+      <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+      <div class="list-group rounded-0">
+        <a href="#" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+         
+          <span class="ml-2">Accept Teacher</span>
+        </a>
+        <a href="{{ url_for('create_course') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+          <span class="ml-2">Create Course</span>
+        </a>
+        <a href="/course_list" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+          <span class="ml-2">show/hide course</span>
+        </a>
+        <a href="/admin_add_module" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          <span class="ml-2">Add/Manage Modules</span>
+      </a>
+      <a href="{{ url_for('admin_create_timetable') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+        <span class="ml-2">Course Timetable</span>
+      </a>
+      <a href="{{ url_for('admin_show_timetable') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+        <span class="ml-2">Show Timetable</span>
+      </a>
+        <!-- list-group-item list-group-item-action active border-0 d-flex align-items-center -->
+      </div>
+    </div>
+    <!-- overlay to close sidebar on small screens -->
+    <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+    <!-- note: in the layout margin auto is the key as sidebar is fixed -->
+    <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+      <!-- top nav -->
+      <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+        <!-- close sidebar -->
+        <button class="btn py-0 d-lg-none" id="open-sidebar">
+          <span class="bi bi-list text-primary h3"></span>
+        </button>
+        <div class="dropdown ml-auto">
+          <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+            <span class="bi bi-person text-primary h4"></span>
+            <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+            <a class="dropdown-item" href="/logout">Logout</a>
+            <a class="dropdown-item" href="#">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <!-- main content -->
+      <main class="container-fluid">
+        <section class="row">
+          <div class="col-12">
+            <div class="jumbotron jumbotron-fluid rounded bg-white border-0 shadow-sm border-left px-4">
+              <div class="container">
+                <h1 class="display-4 mb-2 text-primary">New Teacher Applications</h1>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Email</th>
+                        <th>Experience</th>
+                        <!-- <th>Image</th>
+                        <th>Resume</th> -->
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="teacher-applications">
+                      <!-- Dynamically populated rows -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-success message" id="success-message"></div>
+            <div class="alert alert-danger message" id="error-message"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+<script>
+  $(document).ready(function(){
+    $("#open-sidebar").click(function(){
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    $("#sidebar-overlay").click(function(){
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    function showMessage(type, message) {
+      var messageBox = type === 'success' ? $('#success-message') : $('#error-message');
+      messageBox.text(message).fadeIn();
+      setTimeout(function() {
+        messageBox.fadeOut();
+      }, 3000);
+    }
+
+    function loadTeacherApplications() {
+      $.ajax({
+        url: '/get_teacher_applications',
+        method: 'GET',
+        success: function(data) {
+          // Assuming data is an array of arrays, where each inner array represents a row
+          var applications = data; // Data received from server
+          var tableBody = $('#teacher-applications');
+          tableBody.empty();
+          
+
+          applications.forEach(function(application) {
+            // Fix paths by replacing double backslashes with a single backslash
+            var imagePath = application[3].replace(/\\/g, '/');
+            var resumePath = application[4].replace(/\\/g, '/');
+            console.log(imagePath);
+            var row = `
+              <tr data-id="${application[0]}">
+                <td>${application[5]}</td> <!-- user_name -->
+                <td>${application[1]}</td> <!-- description -->
+                <td>${application[6]}</td> <!-- user_email -->
+                <td>${application[2]}</td> <!-- user_type or experience if you use it -->
+                                <td>
+                  <button class="btn btn-success allow-button">Allow</button>
+                  <button class="btn btn-danger deny-button">Deny</button>
+                </td>
+              </tr>
+            `;
+            tableBody.append(row);
+          });
+
+          // Attach click handlers after rows are appended
+          $('.allow-button').click(function() {
+            var row = $(this).closest('tr');
+            var teacherUid = row.data('id');
+            $.ajax({
+              url: '/approve_teacher',
+              method: 'POST',
+              data: { teacher_uid: teacherUid },
+              success: function() {
+                row.remove();
+                showMessage('success', 'Teacher application approved and email sent.');
+              },
+              error: function() {
+                showMessage('error', 'Failed to approve teacher application.');
+              }
+            });
+          });
+
+          $('.deny-button').click(function() {
+            var row = $(this).closest('tr');
+            var teacherUid = row.data('id');
+            $.ajax({
+              url: '/deny_teacher',
+              method: 'POST',
+              data: { teacher_uid: teacherUid },
+              success: function() {
+                row.remove();
+                showMessage('error', 'Teacher application denied and email sent.');
+              },
+              error: function() {
+                showMessage('error', 'Failed to deny teacher application.');
+              }
+            });
+          });
+        },
+        error: function() {
+          showMessage('error', 'Failed to load teacher applications.');
+        }
+      });
+    }
+
+    loadTeacherApplications();
+  });
+</script>
+
+</body>
+</html>

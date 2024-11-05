@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Admin Dashboard - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    body{
+      font-family: 'Barlow', sans-serif;
+    }
+
+    a:hover{
+      text-decoration: none;
+    }
+
+    .border-left{
+      border-left: 2px solid var(--primary) !important;
+    }
+
+    .sidebar{
+      top: 0;
+      left : 0;
+      z-index : 100;
+      overflow-y: auto;
+    }
+
+    .overlay{
+      background-color: rgb(0 0 0 / 45%);
+      z-index: 99;
+    }
+
+    @media screen and (max-width: 767px){
+      .sidebar{
+        max-width: 18rem;
+        transform : translateX(-100%);
+        transition : transform 0.4s ease-out;
+      }
+      .sidebar.active{
+        transform : translateX(0);
+      }
+    }
+
+    .sidebar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+      <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+      <div class="list-group rounded-0">
+        <a href="/admin_dashboard_acceptTeacher" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+            <span class="ml-2">Accept Teacher</span>
+          </a>
+          <a href="{{ url_for('create_course') }}" class="list-group-item list-group-item-action  border-0 d-flex align-items-center">
+          
+            <span class="ml-2">Create Course</span>
+          </a>
+          <a href="{{ url_for('course_list') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            
+            <span class="ml-2">Course List</span>
+          </a>
+          <a href="/admin_add_module" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+            <span class="ml-2">Add/Manage Modules</span>
+        </a>
+        <a href="{{ url_for('admin_create_timetable') }}" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+            
+          <span class="ml-2">Course Timetable</span>
+        </a>
+        <a href="{{ url_for('admin_show_timetable') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          <span class="ml-2">Show Timetable</span>
+      </a>
+        
+            
+        </button>
+        <div class="collapse" id="purchase-collapse" data-parent="#sidebar">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Sellers</a>
+            <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Purchase Orders</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+    <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+      <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+        <button class="btn py-0 d-lg-none" id="open-sidebar">
+          <span class="bi bi-list text-primary h3"></span>
+        </button>
+        <div class="dropdown ml-auto">
+          <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+            <span class="bi bi-person text-primary h4"></span>
+            <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+            <a class="dropdown-item" href="#">Logout</a>
+            <a class="dropdown-item" href="#">Settings</a>
+          </div>
+        </div>
+      </nav>
+      <main class="container-fluid">
+        <section class="row">
+          
+          
+        </section>
+        
+      <div class="container mt-5">
+        <h2>Create Timetable</h2>
+        
+        <form id="timetableForm">
+            <!-- Course Dropdown -->
+            <div class="form-group">
+                <label for="course">Course</label>
+                <select id="course" class="form-control" required>
+                    <option value="">Select Course</option>
+                    {% for course in courses %}
+                    <option value="{{ course[0] }}">{{ course[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <!-- Subject Dropdown -->
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <select id="subject" class="form-control" disabled required>
+                    <option value="">Select Subject</option>
+                </select>
+            </div>
+    
+            <!-- Day Dropdown -->
+            <div class="form-group">
+                <label for="day">Class Day</label>
+                <select id="day" class="form-control" disabled required>
+                    <option value="">Select Day</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                </select>
+            </div>
+    
+            <!-- Time Slot Dropdown -->
+<div class="form-group">
+  <label for="timeSlot">Start Time</label>
+  <select id="timeSlot" class="form-control" disabled required>
+      <option value="">Select Start Time</option>
+      <option value="16:00">4:00 PM</option>
+      <option value="17:00">5:00 PM</option>
+      <option value="18:00">6:00 PM</option>
+      <option value="19:00">7:00 PM</option>
+      <option value="20:00">8:00 PM</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="endTime">End Time</label>
+  <input type="text" id="endTime" class="form-control" readonly>
+  <span id="convertedEndTime" class="text-muted"></span>
+</div>
+
+    
+            <button type="button" class="btn btn-primary" id="submitBtn" disabled>Submit</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $('#course').change(function () {
+        let courseId = $(this).val();
+        if (courseId) {
+            $('#subject').prop('disabled', false);
+            $.getJSON(`/fetch_subjects/${courseId}`, function (data) {
+                $('#subject').empty().append('<option value="">Select Subject</option>');
+                $.each(data, function (i, item) {
+                    $('#subject').append(`<option value="${item[0]}">${item[1]}</option>`);
+                });
+            });
+        } else {
+            resetFormFields();
+        }
+        checkFormCompletion(); // Check form completion on course change
+    });
+
+    // Enable day dropdown after subject selection
+    $('#subject').change(function () {
+        $('#day').prop('disabled', !$(this).val());
+        if (!$(this).val()) {
+            resetDayAndTimeSlots();
+        }
+        checkFormCompletion(); // Check form completion on subject change
+    });
+
+    // Enable time slot dropdown after selecting a day and fetch available slots
+    $('#day').change(function () {
+        let courseId = $('#course').val();
+        let classDay = $(this).val();
+        let subject = $('#subject').val();
+
+        if (classDay && subject) {
+            $('#timeSlot').prop('disabled', false);
+        } else {
+            resetTimeSlot();
+        }
+        checkFormCompletion(); // Check form completion on day change
+    });
+
+    // Set end time based on selected start time and check for conflicts
+    $('#timeSlot').change(function () {
+        let startTime = $(this).val();
+        if (startTime) {
+            let endTime = new Date(`1970-01-01T${startTime}:00`);
+            endTime.setHours(endTime.getHours() + 1); // Add 1 hour for end time
+
+            // Get the hours and minutes for end time
+            let endHour = endTime.getHours();
+            let endMinutes = endTime.getMinutes();
+            
+            // Format end time in 24-hour format for the input
+            $('#endTime').val(`${endHour < 10 ? '0' : ''}${endHour}:${endMinutes < 10 ? '0' : ''}${endMinutes}`); 
+            
+            // Convert end time to 12-hour format
+            let endHour12 = endHour % 12 || 12; // Convert to 12-hour format, handle 0 case
+            let endAmPm = endHour >= 12 ? 'PM' : 'AM'; // Determine AM/PM
+            let convertedEndTime = `${endHour12}:${endMinutes < 10 ? '0' : ''}${endMinutes} ${endAmPm}`;
+            
+            // Update the span with the converted end time
+            $('#convertedEndTime').text(`Converted End Time: ${convertedEndTime}`);
+
+            // Check for existing timetable entry
+            let courseId = $('#course').val();
+            let classDay = $('#day').val();
+            let subject = $('#subject').val();
+
+            $.ajax({
+                url: `/check_conflict/${courseId}/${classDay}/${startTime}`,
+                type: 'GET',
+                success: function (response) {
+                    if (response.conflict) {
+                        alert(`Conflict detected: ${response.subject} is assigned at this time.`);
+                        location.reload();
+                    }
+                }
+            });
+        } else {
+            $('#endTime').val('');
+            $('#convertedEndTime').text(''); // Clear the span if no start time is selected
+        }
+        checkFormCompletion(); // Check form completion on time slot change
+    });
+
+    // Function to reset form fields
+    function resetFormFields() {
+        $('#subject').prop('disabled', true).empty().append('<option value="">Select Subject</option>');
+        resetDayAndTimeSlots();
+    }
+
+    function resetDayAndTimeSlots() {
+        $('#day').prop('disabled', true).val('');
+        resetTimeSlot();
+    }
+
+    function resetTimeSlot() {
+        $('#timeSlot').prop('disabled', true).empty().append('<option value="">Select Start Time</option>');
+        $('#endTime').val('');
+    }
+
+    // Function to check if the form is complete and enable/disable submit button
+    function checkFormCompletion() {
+        const isComplete = $('#course').val() && $('#subject').val() && $('#day').val() && $('#timeSlot').val();
+        $('#submitBtn').prop('disabled', !isComplete);
+    }
+
+    // Submit timetable form data
+    $('#submitBtn').click(function () {
+        const timetableData = {
+            uid: 1,  // Replace with dynamic user ID if needed
+            course_id: $('#course').val(),
+            subject: $('#subject').val(),
+            class_day: $('#day').val(),
+            class_startime: $('#timeSlot').val(),
+            class_endtime: $('#endTime').val()
+        };
+
+        $.ajax({
+            url: '/submit_timetable',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(timetableData),
+            success: function (response) {
+                alert(response.message);
+                $('#timetableForm')[0].reset();
+                resetFormFields();
+                checkFormCompletion(); // Check form completion after submission
+            }
+        });
+    });
+  
+    
+    </script></body>
+</html>

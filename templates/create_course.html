@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+body{
+  font-family: 'Barlow', sans-serif;
+}
+
+a:hover{
+  text-decoration: none;
+}
+
+.border-left{
+  border-left: 2px solid var(--primary) !important;
+}
+
+
+.sidebar{
+  top: 0;
+  left : 0;
+  z-index : 100;
+  overflow-y: auto;
+}
+
+.overlay{
+  background-color: rgb(0 0 0 / 45%);
+  z-index: 99;
+}
+
+/* sidebar for small screens */
+@media screen and (max-width: 767px){
+  
+  .sidebar{
+    max-width: 18rem;
+    transform : translateX(-100%);
+    transition : transform 0.4s ease-out;
+  }
+  
+  .sidebar.active{
+    transform : translateX(0);
+  }
+  
+}
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- sidebar -->
+      <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+        <h1 class="bi bi-bootstrap text-primary d-flex my-4 justify-content-center"></h1>
+        <div class="list-group rounded-0">
+          <a href="#" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+        
+            <span class="ml-2">Create Course</span>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action border-0 align-items-center">
+        
+            <span class="ml-2">Authorize Teacher</span>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action border-0 align-items-center">
+        
+            <span class="ml-2">Assign teacher </span>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action border-0 align-items-center">
+        
+            <span class="ml-2">Allow Student </span>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action border-0 align-items-center">
+        
+            <span class="ml-2">Enrolled student list </span>
+          </a>
+          <button class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#sale-collapse">
+            <div>
+              <span class="bi bi-cart-dash"></span>
+              <span class="ml-2">Sales</span>
+            </div>
+            <span class="bi bi-chevron-down small"></span>
+          </button>
+          <div class="collapse" id="sale-collapse" data-parent="#sidebar">
+            <div class="list-group">
+              <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Customers</a>
+              <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Sale Orders</a>
+            </div>
+          </div>
+  
+          <button class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#purchase-collapse">
+            <div>
+              <span class="bi bi-cart-plus"></span>
+              <span class="ml-2">Purchase</span>
+            </div>
+            <span class="bi bi-chevron-down small"></span>
+          </button>
+          <div class="collapse" id="purchase-collapse" data-parent="#sidebar">
+            <div class="list-group">
+              <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Sellers</a>
+              <a href="#" class="list-group-item list-group-item-action border-0 pl-5">Purchase Orders</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- overlay to close sidebar on small screens -->
+      <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+      <!-- note: in the layout margin auto is the key as sidebar is fixed -->
+      <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+        <!-- top nav -->
+        <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+          <!-- close sidebar -->
+          <button class="btn py-0 d-lg-none" id="open-sidebar">
+            <span class="bi bi-list text-primary h3"></span>
+          </button>
+          <div class="dropdown ml-auto">
+            <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+              <span class="bi bi-person text-primary h4"></span>
+              <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+              <a class="dropdown-item" href="#">Logout</a>
+              <a class="dropdown-item" href="#">Settings</a>
+            </div>
+          </div>
+        </nav>
+        <!-- main content -->
+        <div class="container" style="margin-top: 50px;">
+            <div class="card" style=" border-color: #007bff;">
+                <div class="card-header text-white" style="background-color: #007bff;
+                border-color: #007bff;">
+                    Create Course
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        <div class="mt-3">
+                          {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                              {{ message }}
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    {% endwith %}
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="name">Course Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cours_desc">Course Description</label>
+                            <textarea class="form-control" id="cours_desc" name="cours_desc" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="cost">Course Cost</label>
+                            <input type="number" step="0.01" class="form-control" id="cost" name="cost" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="background-color: #007bff;
+                        border-color: #007bff;">Create Course</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    
+        
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<script>
+  $(document).ready(()=>{
+  $('#open-sidebar').click(()=>{
+      // add class active on #sidebar
+      $('#sidebar').addClass('active');
+      // show sidebar overlay
+      $('#sidebar-overlay').removeClass('d-none');
+   });
+   $('#sidebar-overlay').click(function(){
+      // add class active on #sidebar
+      $('#sidebar').removeClass('active');
+      // show sidebar overlay
+      $(this).addClass('d-none');
+   });
+});
+</script>
+

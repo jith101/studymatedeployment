@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Registration Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+        .registration-form {
+            padding: 50px 0;
+        }
+        .registration-form form {
+            background-color: #fff;
+            max-width: 500px;
+            margin: auto;
+            padding: 30px 40px;
+            border-top: 3px solid #007bff;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        }
+        .registration-form h3 {
+            margin-bottom: 30px;
+        }
+        .social {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .social .go, .social .fb {
+            padding: 10px;
+            width: 48%;
+            text-align: center;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .social .go {
+            background-color: #dd4b39;
+        }
+        .social .fb {
+            background-color: #3b5998;
+        }
+    </style>
+</head>
+<body>
+
+<div class="registration-form">
+    <form id="registerForm" action="/register" method="post">
+        <h3>Student Register</h3>
+        {% if error %}
+            <p style="color: red">{{ error }}</p>
+        {% endif %}
+        <div class="form-group">
+            <label for="Name">Full Name:</label>
+            <input type="text" id="name" class="form-control" name="name" placeholder="Name" required>
+            <span id="name-error" style="color: red"></span>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" class="form-control" name="email" placeholder="Email" required>
+            <span id="email-error" style="color: red"></span>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" class="form-control" name="password" placeholder="Password" required>
+            <span id="password-error" style="color: red"></span>
+        </div>
+        <button type="submit" name="submitBtn" id="submitBtn" class="btn btn-primary btn-block" disabled>Register</button>
+
+        <div class="social">
+            <!-- <div class="go"><i class="fab fa-google"></i> Google</div>
+            <div class="fb"><i class="fab fa-facebook"></i> Facebook</div> -->
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+   $(document).ready(function() {
+    // Function to validate name
+    $('#name').on('keyup', function() {
+        validateName();
+    });
+
+    function validateName() {
+    var name = $('#name').val();
+    var nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/; // Regular expression to allow only alphabetic characters
+
+    if (!name.trim()) {
+        $('#name-error').text('Name is required.');
+        return false;
+    } else if (!nameRegex.test(name)) {
+        $('#name-error').text('Name should contain only alphabetic characters.');
+        return false;
+    } else {
+        $('#name-error').text('');
+        return true;
+    }
+}
+
+
+    // Function to validate email
+    $('#email').on('keyup', function() {
+        validateEmail();
+    });
+
+    function validateEmail() {
+        var email = $('#email').val();
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            $('#email-error').text('Enter a valid email address.');
+            return false;
+        } else {
+            $('#email-error').text('');
+            return true;
+        }
+    }
+
+    // Function to validate password
+    $('#password').on('keyup', function() {
+        validatePassword();
+    });
+
+    function validatePassword() {
+        var password = $('#password').val();
+        var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            $('#password-error').text('Password must contain at least one uppercase letter, one lowercase letter, one digit, one special character, and be at least 8 characters long.');
+            return false;
+        } else {
+            $('#password-error').text('');
+            return true;
+        }
+    }
+
+    // Enable submit button only if all fields are valid
+    // $('#registerForm').on('keyup change', '#name, #email, #password', function() {
+    //     var isValidName = validateName();
+    //     var isValidEmail = validateEmail();
+    //     var isValidPassword = validatePassword();
+
+    //     if (isValidName && isValidEmail && isValidPassword) {
+    //         $('#submitBtn').prop('disabled', false);
+    //     } else {
+    //         $('#submitBtn').prop('disabled', true);
+    //     }
+    // });
+
+    $('#registerForm').on('input', '#name, #email, #password', function() {
+    // Check if all fields have been filled before validating
+    if ($('#name').val().trim() && $('#email').val().trim() && $('#password').val().trim()) {
+        var isValidName = validateName();
+        var isValidEmail = validateEmail();
+        var isValidPassword = validatePassword();
+
+        if (isValidName && isValidEmail && isValidPassword) {
+            $('#submitBtn').prop('disabled', false);
+        } else {
+            $('#submitBtn').prop('disabled', true);
+        }
+    }
+});
+
+
+    // Prevent form submission if fields are invalid
+    $('#registerForm').on('submit', function(event) {
+        if (!validateName() || !validateEmail() || !validatePassword()) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+</body>
+</html>

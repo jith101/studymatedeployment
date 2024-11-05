@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Admin Dashboard - Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    body{
+      font-family: 'Barlow', sans-serif;
+    }
+
+    a:hover{
+      text-decoration: none;
+    }
+
+    .border-left{
+      border-left: 2px solid var(--primary) !important;
+    }
+
+    .sidebar{
+      top: 0;
+      left : 0;
+      z-index : 100;
+      overflow-y: auto;
+    }
+
+    .overlay{
+      background-color: rgb(0 0 0 / 45%);
+      z-index: 99;
+    }
+
+    @media screen and (max-width: 767px){
+      .sidebar{
+        max-width: 18rem;
+        transform : translateX(-100%);
+        transition : transform 0.4s ease-out;
+      }
+      .sidebar.active{
+        transform : translateX(0);
+      }
+    }
+
+    .sidebar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3 col-lg-2 px-0 position-fixed h-100 bg-white shadow-sm sidebar" id="sidebar">
+      <img src="https://t4.ftcdn.net/jpg/02/27/45/09/360_F_227450952_KQCMShHPOPebUXklULsKsROk5AvN6H1H.jpg" alt="Admin Icon">
+      <center>
+        <h1 class="dropdown-header text-primary">{{ session['name'] }}</h1> <!-- Increased to h1 and set to blue -->
+        <small class="dropdown-item text-muted text-primary">Role: Teacher</small> <!-- Role text in blue -->
+
+      </center>
+      <div class="list-group rounded-0">
+        <a href="{{ url_for('teacher_dashboard_show') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+          <span class="ml-2">Assigned Course</span>
+        </a>
+        
+        <a href="{{ url_for('teacher_schedule_class') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          
+          <span class="ml-2">Schedule Class</span>
+        </a>
+        <a href="{{ url_for('teacher_notes') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          <span class="ml-2">Access Notes</span>
+        </a>
+        <a href="{{ url_for('teacher_view_sentiment') }}" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+          <span class="ml-2">View Sentiment Analysis</span>
+      </a>
+      <a href="{{ url_for('teacher_view_past_classes') }}" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+        <span class="ml-2">Record Class</span>
+    </a>
+       
+        
+        
+        
+      </div>
+    </div>
+    <div class="w-100 vh-100 position-fixed overlay d-none" id="sidebar-overlay"></div>
+    <div class="col-md-9 col-lg-10 ml-md-auto px-0">
+      <nav class="w-100 d-flex px-4 py-2 mb-4 shadow-sm">
+        <button class="btn py-0 d-lg-none" id="open-sidebar">
+          <span class="bi bi-list text-primary h3"></span>
+        </button>
+        <div class="dropdown ml-auto">
+          <button class="btn py-0 d-flex align-items-center" id="logout-dropdown" data-toggle="dropdown" aria-expanded="false">
+            <span class="bi bi-person text-primary h4"></span>
+            <span class="bi bi-chevron-down ml-1 mb-2 small"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm" aria-labelledby="logout-dropdown">
+            <h6 class="dropdown-header">{{ session['name'] }}</h6> <!-- Display user's name -->
+            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+          </div>
+        </div>
+      </nav>
+      <main class="container-fluid">
+        <section class="row">
+          
+          
+          
+        </section>
+        <div class="jumbotron jumbotron-fluid rounded bg-white border-0 shadow-sm border-left px-4">
+            <div class="container mt-4">
+                <!-- Dropdown for selecting course -->
+                <div class="form-group">
+                    <label for="courseSelect">Select Course:</label>
+                    <select id="courseSelect" class="form-control">
+                        <option value="">Select a course</option>
+                        {% for course in courses %}
+                            <option value="{{ course[0] }}">{{ course[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                
+                <h2 class="mt-4 mb-3 text-primary font-weight-bold">Recorded Class</h2>
+
+                <!-- Table for displaying past classes -->
+                <div id="pastClassesDiv">
+                    <!-- Content will be loaded here via AJAX -->
+                </div>
+            
+                <!-- Modal for viewing video -->
+                <div class="modal fade" id="viewModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Class Recording</h5>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <video id="classVideo" width="100%" controls></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+      </main>
+    </div>
+  </div>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'></script>
+<script>
+  $(document).ready(function() {
+    // Toggle sidebar (unchanged)
+    $("#open-sidebar").click(function() {
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    $("#sidebar-overlay").click(function() {
+      $(".sidebar").toggleClass("active");
+      $("#sidebar-overlay").toggleClass("d-none");
+    });
+
+    // Handle course selection and load past classes
+    $('#courseSelect').change(function() {
+      let course_id = $(this).val();
+      $.ajax({
+        url: '/get_past_class_rec',
+        method: 'POST',
+        data: { course_id: course_id },
+        success: function(response) {
+          let tableHtml = `
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+          const currentDateTime = new Date();
+          const filteredClasses = response.past_classes.filter(class_ => {
+            const classDateTime = new Date(class_.class_datetime);
+            return classDateTime < currentDateTime;
+          });
+
+          filteredClasses.forEach(class_ => {
+            let date = new Date(class_.class_datetime);
+            let formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+            let hours = date.getHours();
+            let minutes = date.getMinutes().toString().padStart(2, '0');
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            let formattedTime = `${hours}:${minutes} ${ampm}`;
+
+            let actionButtons = '';
+            if (class_.recording) {
+              actionButtons = `
+                <button class="btn btn-secondary btn-view" data-recording="${class_.recording}">View</button>
+                <button class="btn btn-danger btn-delete" data-scid="${class_.scid}">Delete</button>`;
+            } else {
+              actionButtons = `
+                <button class="btn btn-primary btn-upload" data-scid="${class_.scid}">Upload</button>`;
+            }
+
+            tableHtml += `
+              <tr>
+                <td>${formattedDate}</td>
+                <td>${formattedTime}</td>
+                <td>${class_.description}</td>
+                <td>${actionButtons}</td>
+              </tr>`;
+          });
+
+          tableHtml += `</tbody></table>`;
+          $('#pastClassesDiv').html(tableHtml);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error("Error fetching past classes:", textStatus, errorThrown);
+        }
+      });
+    });
+
+    // Handle upload button click
+    $(document).on('click', '.btn-upload', function() {
+      let scid = $(this).data('scid');
+      let fileInput = $('<input type="file" accept="video/*" style="display: none;">');
+      $('body').append(fileInput);
+      fileInput.trigger('click');
+
+      fileInput.on('change', function() {
+        let file = fileInput[0].files[0];
+        if (file) {
+          let formData = new FormData();
+          formData.append('file', file);
+
+          $.ajax({
+            url: `/upload_recording/${scid}`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+              if (response.success) {
+                alert('Recording uploaded successfully!');
+                $('#courseSelect').trigger('change');  // Refresh the div
+              } else {
+                alert('Error uploading recording.');
+              }
+            },
+            error: function() {
+              alert('An error occurred while uploading the recording.');
+            }
+          });
+        }
+        fileInput.remove();
+      });
+    });
+
+    // Handle view button click
+    $(document).on('click', '.btn-view', function() {
+      let recording = $(this).data('recording');
+      if (recording) {
+        $('#classVideo').attr('src', recording);
+        $('#viewModal').modal('show');
+      }
+    });
+
+    // Handle delete button click
+    $(document).on('click', '.btn-delete', function() {
+      let scid = $(this).data('scid');
+      $.post(`/delete_recording/${scid}`, function(response) {
+        if (response.success) {
+          alert('Recording deleted successfully!');
+          $('#courseSelect').trigger('change');  // Refresh the div
+        } else {
+          alert('Error deleting recording.');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
